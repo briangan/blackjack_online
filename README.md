@@ -58,7 +58,7 @@ This is an online Blackjack card game to allow 1 or more players to play against
 ------------------------------------
 ## Data Models
   * Game - has a Deck, and some Hands
-  * Deck - has set of PlayCard which could be shuffled and removed after passing out card.
+  * Deck - has set of PlayCard which could be shuffled.  This model is optinal by direct reference of PlayCard.game_id
   * User - account authentication and attributes
   * Hand - one User or the dealer that has set of PlayCard
   * PlayCard - different from Card, the raw card with unique rank + suit combo in a deck.  Maybe future game might have multiple decks.
