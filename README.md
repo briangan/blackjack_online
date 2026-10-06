@@ -1,13 +1,16 @@
 # README
 
+---------------------------------
 ## Description
 
 This is an online Blackjack card game to allow 1 or more players to play against the dealer.
 
+----------------------------------
 ## References
-  * Project documentation: in folder "doc", see ["Praeses Blackjack Homework_2026__WebApp.pdf"](doc/Praeses_Blackjack_Homework_2026_WebApp.pdf)
+  * Project documentation: in folder "doc", see ["Praeses_Blackjack_Homework_2026_WebApp.pdf"](doc/Praeses_Blackjack_Homework_2026_WebApp.pdf)
   * [Blackjack Rules](https://bicyclecards.com/how-to-play/blackjack/)
 
+-------------------------------------
 ## Gameplay Steps
   ### Game Start
   * If New Game, shuffle a deck of 52; Else keep existing left over cards
@@ -79,5 +82,3 @@ This is an online Blackjack card game to allow 1 or more players to play against
 * Services (job queues, cache servers, search engines, etc.)
 
 * Deployment instructions
-
-* ...
