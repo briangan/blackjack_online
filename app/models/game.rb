@@ -5,7 +5,7 @@ class Game < ApplicationRecord
   belongs_to :dealer, class_name:'Dealer', foreign_key:'dealer_id', optional: true
 
   has_many :play_cards, dependent: :destroy
-  has_many :available_play_cards, -> { where("given_user_id IS NULL")}, class_name:'PlayCard'
+  has_many :available_play_cards, -> { where("hand_id IS NULL")}, class_name:'PlayCard'
   has_many :hands, dependent: :destroy
 
   before_save :set_defaults
@@ -54,7 +54,7 @@ class Game < ApplicationRecord
   # starts w/ dealer
   hands.each do|hand|
     1.upto(2) do
-      a_play_cards[index].pass_to!(hand.user_id)
+      a_play_cards[index].pass_to!(hand.id)
       index += 1
     end
   end

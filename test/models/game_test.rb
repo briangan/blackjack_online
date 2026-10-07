@@ -7,7 +7,7 @@ class GameTest < ActiveSupport::TestCase
     Game.delete_all
   end
 
-  test "Create game" do
+  test "Create game by different user" do
     game = create_game_first
 
     # Totally new user
@@ -46,6 +46,9 @@ class GameTest < ActiveSupport::TestCase
       game.add_hand_for_user!(third_user, third_user.balance + 25)
     end
 
+    third_bet_amount = 12.5
+    third_hand = check_adding_user(game, third_user, third_bet_amount)
+
     # Existing user already has hand
     second_user_balance_b4 = second_user.balance
     second_diff_bet_amount = 10.95
@@ -55,10 +58,27 @@ class GameTest < ActiveSupport::TestCase
     assert second_diff_bet_amount, second_hand_after.total_bet_amount
     assert second_user.balance, second_user_balance_b4 - second_diff_bet_amount
 
-    assert 3, game.hands.count
+    # Check hands so far
+    assert 4, game.hands.count
+    hand_user_ids_expected = [game.dealer_id, new_user_new_hand.user_id, second_user.id, second_user.id, third_user.id].sort
+    assert_equal hand_user_ids_expected, game.hands.collect(&:user_id).sort
 
-    # TODO: check available actions for each phrase of the Hand
+    # Start game, check passed cards
+    game.start_game!
 
+    game.hands.each do|hand|
+      assert_equal 2, hand.play_cards.count
+    end
+  end
+
+  test "Play Hit" do
+    game = create_game_first
+
+    user_name = "User #{1000 + rand(10000000000)}"
+    bet_amount = 5
+    hand = game.add_hand_for_user!(user_name, bet_amount)
+
+    game.start_game!
   end
 
   private 

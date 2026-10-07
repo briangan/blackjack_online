@@ -14,7 +14,7 @@ class Hand < ApplicationRecord
   belongs_to :user, dependent: :destroy
   alias_method :player, :user
 
-  has_many :play_cards, -> { joins(:game).where("#{Hand.table_name}.user_id=given_user_id") }
+  has_many :play_cards
   has_many :play_actions
 
   before_create :set_initial_attributes

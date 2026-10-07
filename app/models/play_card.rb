@@ -6,7 +6,7 @@ class PlayCard < ApplicationRecord
     Card.new(rank, suit)
   end
 
-  def pass_to!(user_id_or_user)
-    self.update(user_id: user_id_or_user.is_a?(User) ? user_id_or_user.id : user_id_or_user)
+  def pass_to!(hand_or_hand_id)
+    self.update(hand_id: hand_or_hand_id.is_a?(Hand) ? hand_or_hand_id.id : hand_or_hand_id)
   end
 end
