@@ -69,9 +69,11 @@ class GameTest < ActiveSupport::TestCase
     game.hands.each do|hand|
       assert_equal 2, hand.play_cards.count
     end
+
+    assert_equal (game.play_cards.count - game.hands.count * 2), game.available_play_cards.count
   end
 
-  test "Play Hit" do
+  test "Play Hit and Bust" do
     game = create_game_first
 
     user_name = "User #{1000 + rand(10000000000)}"

@@ -71,7 +71,7 @@ end
     1.upto(COUNT_OF_DECKS_PER_GAME) do|deck_i|
       Card::RANKS.each do|rank|
         Card::SUITS.each do|suit|
-          PlayCard.create(game_id: self.id, rank: rank, suit: suit, order_index: shuffled_order_indices.pop)
+          PlayCard.create(game_id: self.id, rank: rank, suit: suit, order_index: shuffled_order_indices.shift)
         end
       end
     end

@@ -6,8 +6,8 @@ class Card
   attr_reader :rank, :suit
 
   def initialize(rank, suit)
-    self.rank = rank.upcase
-    self.suit = suit.titleize
+    @rank = rank.upcase
+    @suit = suit.titleize
   end
 
   # Card like A can have multiple values [1, 11]
@@ -15,9 +15,9 @@ class Card
     if rank == 'A'
       [1, 11]
     elsif RANKS_OF_10_VALUE.include?(rank)
-      10
+      [10]
     else
-      rank.to_i
+      [rank.to_i]
     end
   end
 
