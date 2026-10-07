@@ -18,22 +18,20 @@ class Game < ApplicationRecord
   ###################################
   # Main actions
 
-  # Find or create user.  Then create an empty hand given bet amount
+  # Find or create user.  Then create an new empty hand given bet amount, which means a user can have multiple hands.
   # @return <Hand> either found or created hand
-  def add_user!(name_or_user, bet_amount)
+  def add_hand_for_user!(name_or_user, bet_amount)
     raise ArgumentError.new("Need to provide the name of user") if name_or_user.nil? || (name_or_user.is_a?(String) && name_or_user.strip.blank? )
 
     user = name_or_user.is_a?(User) ? name_or_user : User.find_or_create_by(name: name_or_user.strip)
 
     unless user.is_a?(Dealer)
-      raise InvalidBetAmount.new if bet_amount.to_f <= 0.0
+      raise InvalidBetAmountError.new if bet_amount.to_f <= 0.0
 
-      raise OutOfBalance.new if user.balance.to_f <= 0.0
+      raise OutOfBalanceError.new if user.balance.to_f <= bet_amount
     end
 
-    self.hands.find_or_create_by(user_id: user.id) do|_hand|
-        _hand.total_bet_amount = _hand.total_bet_amount.to_f + bet_amount
-      end
+    self.hands.create(user_id: user.id, total_bet_amount: bet_amount)
   end
 
   def start_game!
