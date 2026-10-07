@@ -18,6 +18,11 @@ class GameTest < ActiveSupport::TestCase
       new_user_new_hand = game.add_hand_for_user!(new_name)
     end
 
+    # Invalid bet amount
+    assert_raises Error::InvalidBetAmountError do
+      new_user_new_hand = game.add_hand_for_user!(new_name, -3)
+    end
+
     new_bet_amount = 3.0
     new_user_new_hand = check_adding_user(game, new_name, new_bet_amount)
 
@@ -37,7 +42,7 @@ class GameTest < ActiveSupport::TestCase
     third_user = User.create!(name: third_user_name)
     assert_equal User::DEFAULT_BALANCE , third_user.balance
 
-    assert_raises OutOfBalanceError do
+    assert_raises Error::OutOfBalanceError do
       game.add_hand_for_user!(third_user, third_user.balance + 25)
     end
 
@@ -49,6 +54,8 @@ class GameTest < ActiveSupport::TestCase
     second_user.reload
     assert second_diff_bet_amount, second_hand_after.total_bet_amount
     assert second_user.balance, second_user_balance_b4 - second_diff_bet_amount
+
+    assert 3, game.hands.count
 
     # TODO: check available actions for each phrase of the Hand
 

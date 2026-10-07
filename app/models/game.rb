@@ -26,9 +26,9 @@ class Game < ApplicationRecord
     user = name_or_user.is_a?(User) ? name_or_user : User.find_or_create_by(name: name_or_user.strip)
 
     unless user.is_a?(Dealer)
-      raise InvalidBetAmountError.new if bet_amount.to_f <= 0.0
+      raise Error::InvalidBetAmountError.new if bet_amount.to_f <= 0.0
 
-      raise OutOfBalanceError.new if user.balance.to_f <= bet_amount
+      raise Error::OutOfBalanceError.new if user.balance.to_f <= bet_amount
     end
 
     self.hands.create(user_id: user.id, total_bet_amount: bet_amount)
