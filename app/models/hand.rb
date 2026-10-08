@@ -82,12 +82,13 @@ class Hand < ApplicationRecord
   end
 
   def to_s
-    "Hand for #{user.name} (#{user.type}) w/ $#{total_bet_amount}, values #{variants_of_total_value.inspect}, cards: #{play_cards.collect{|pc| pc.card.to_s }.join(", ")}"
+    "Hand for #{user.name} (#{user.type}) w/ $#{total_bet_amount}, values #{variants_of_total_value.inspect}, #{status}, cards: #{play_cards.collect{|pc| pc.card.to_s }.join(", ")}"
   end
 
   def check_for_ending_status
     if busted?
-      self.update(status: 'LOSE')
+      self.status = 'LOSE'
+      self.save
     end
   end
   
@@ -96,17 +97,21 @@ class Hand < ApplicationRecord
     play_cards.count >= 2 && play_cards.collect{|pc| pc.card.values.min }.uniq.size == 1
   end
 
-  # Based on status and cards
-  #   Win: basically 2 x total_bet_amount
-  #   Win with Blackjack (Ace + 10‑value card): 2.5 x total_bet_amount
+  # Depends whether the hand has @is_blackjack?
+  def winning_return_amount_factor
+    is_blackjack? ? 2.5 : 2
+  end
+
+  # Based on status and cards.  Uses @winning_return_amount_factor
+  #   Win: total_bet_amount x @winning_return_amount_factor
   #   Tie: no change to balance
   # @return <Integer>
   def return_amount_to_user!
     returning_amount = 
-      if tied?
+      if tie?
         total_bet_amount
       elsif win?
-        is_blackjack? ? (2.5 * total_bet_amount.to_f) : (2 * total_bet_amount.to_f)
+        total_bet_amount.to_f * winning_return_amount_factor
       else
         0
       end
@@ -133,7 +138,8 @@ class Hand < ApplicationRecord
   end
 
   def stand!
-    self.update(status: 'STAND')
+    self.status = 'STAND'
+    self.save
     ::PlayAction::Stand.create(hand_id: self.id)
   end
   alias_method :stay!, :stand!
@@ -153,7 +159,8 @@ class Hand < ApplicationRecord
 
     check_for_ending_status
     unless is_turn_ended?
-      self.update(status: 'STAND')
+      self.status = 'STAND'
+      self.save
     end
 
     next_play_card

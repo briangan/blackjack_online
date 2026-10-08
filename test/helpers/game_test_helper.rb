@@ -36,13 +36,16 @@ module GameTestHelper
     new_user_new_hand
   end
 
-
+  # Game created, user created (User2xxx), hand created, game started
+  # @options
+  #   :user_name_prefix <String> default 'User'
+  #   :bet_amount <Numeric> default 5
   # @return <Hand>
-  def create_game_then_hand
+  def create_game_then_hand(options = {})
     game = create_game_first
 
-    user_name = "User #{1000 + rand(10000000000)}"
-    bet_amount = 5
+    user_name = "#{options[:user_name_prefix] || 'User'} #{1000 + rand(10000000000)}"
+    bet_amount = options[:bet_amount] || 5
     hand = game.add_hand_for_user!(user_name, bet_amount)
 
     game.start_game!

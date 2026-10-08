@@ -44,7 +44,7 @@ class GameTest < ActiveSupport::TestCase
     third_user = User.create!(name: third_user_name)
     assert_equal User::DEFAULT_BALANCE , third_user.balance
 
-    assert_raises Error::OutOfBalanceError do
+    assert_raises Error::InsufficientBalanceForBetAmount do
       game.add_hand_for_user!(third_user, third_user.balance + 25)
     end
 
@@ -78,9 +78,165 @@ class GameTest < ActiveSupport::TestCase
   end
 
   
+  test "Win vs Dealer - Higher Value" do
+    puts "Win vs Dealer - Higher Value --------------------" 
+    hand = create_game_then_hand
+    game = hand.game
+    previous_balance = hand.user.balance
+
+    force_this_higher_than_that(hand, game.dealer_hand)
+
+    if game.dealer_hand.best_total_value < hand.best_total_value
+      hand.stand!
+      game.dealer_hand.stand!
+
+      game.analyze_hands!
+
+      game.dealer_hand.reload
+      hand.reload # this is local compared to game.play_cards one
+
+      game.hands.each do|h|
+        puts h
+      end
+      
+      assert hand.win?
+      assert hand.user.balance, previous_balance + hand.total_bet_amount * hand.winning_return_amount_factor
+
+    else # If somehow still cannot be higher, some data problem
+    end
+  end
+
+  test "Win vs Dealer - Dealer Busted" do
+    puts "Win vs Dealer - Dealer Busted --------------------" 
+    hand = create_game_then_hand
+    game = hand.game
+    previous_balance = hand.user.balance
+
+    hand.stand!
+
+    while !game.dealer_hand.busted?
+      game.dealer_hand.hit!
+    end
   
+    game.analyze_hands!
+    game.dealer_hand.reload
+    hand.reload # this is local compared to game.play_cards one
 
+    game.hands.each do|h|
+      puts h
+    end
 
+    assert game.dealer_hand.busted?
 
+    assert hand.win?
+    assert hand.user.balance, previous_balance + hand.total_bet_amount * hand.winning_return_amount_factor
+
+  end
+
+  # Modify either Hand's PlayCard to force @wanted_higher_hand > @wanted_lower_hand
+  def force_this_higher_than_that(wanted_higher_hand, wanted_lower_hand)
+    if wanted_higher_hand.best_total_value <= wanted_lower_hand.best_total_value
+      diff = wanted_lower_hand.best_total_value - wanted_higher_hand.best_total_value
+
+      if (deductable_card = wanted_lower_hand.play_cards.find{|pc| pc.card.max_value > 2 })
+        deductable_card.update(rank: Card.find_rank_with_value(deductable_card.card.max_value - diff - 1) )
+        wanted_lower_hand.reload
+
+      elsif (raisable_card = wanted_higher_hand.play_cards.find{|pc| pc.card.max_value < 10 })
+        raisable_card.update(rank: Card.find_rank_with_value(raisable_card.card.max_value + diff + 1) )
+        wanted_higher_hand.reload
+      end
+    end
+    wanted_higher_hand
+  end
+
+  test "Lose - Lower Value" do
+    puts "Lose - Lower Value --------------------" 
+    hand = create_game_then_hand
+    game = hand.game
+    previous_balance = hand.user.balance
+
+    force_this_higher_than_that(game.dealer_hand, hand)
+
+    if game.dealer_hand.best_total_value < hand.best_total_value
+      hand.stand!
+      game.dealer_hand.stand!
+
+      game.analyze_hands!
+
+      game.dealer_hand.reload
+      hand.reload # this is local compared to game.play_cards one
+
+      game.hands.each do|h|
+        puts h
+      end
+      
+      assert hand.win?
+      assert hand.user.balance, previous_balance
+
+    else # If somehow still cannot be higher, some data problem
+    end
+  end
+
+  test "Lose - Busted" do
+    puts "Lose - Busted --------------------" 
+    hand = create_game_then_hand
+    game = hand.game
+    previous_balance = hand.user.balance
+
+    hand.stand!
+
+    while !hand.busted?
+      hand.hit!
+    end
+  
+    assert_raises ::Error::DealerNotFinished do
+       game.analyze_hands!
+    end
+    game.dealer_hand.stand!
+
+    game.dealer_hand.reload
+    hand.reload # this is local compared to game.play_cards one
+
+    game.hands.each do|h|
+      puts h
+    end
+
+    assert hand.busted?
+
+    assert hand.lose?
+    assert hand.user.balance, previous_balance
+
+  end
+
+  test "Tie with Dealer" do
+    puts "Tie with Dealer --------------------" 
+    hand = create_game_then_hand
+    game = hand.game
+    previous_balance = hand.user.balance
+
+    dealer_cards = game.dealer_hand.play_cards.all
+    hand.play_cards.all.each_with_index do|pc, i|
+      pc.update(rank: dealer_cards[i].rank, suit: dealer_cards[i].suit )
+    end
+
+    hand.reload
+    hand.stand!
+    game.dealer_hand.stand!
+
+    game.analyze_hands!
+
+    game.dealer_hand.reload
+    hand.reload # this is local compared to game.play_cards one
+
+    game.hands.each do|h|
+      puts h
+    end
+
+    assert hand.tie?
+
+    assert hand.user.balance, previous_balance + hand.total_bet_amount
+
+  end
 
 end

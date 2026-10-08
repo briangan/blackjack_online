@@ -13,7 +13,9 @@ class Game < ApplicationRecord
   after_create :generate_initial_records!
 
   def dealer_hand
-    self.hands.find_or_create_by(user_id: dealer_id)
+    dh = self.hands.find_or_initialize_by(user_id: dealer_id)
+    dh.save
+    dh
   end
 
   ###################################
@@ -29,7 +31,7 @@ class Game < ApplicationRecord
     unless user.is_a?(Dealer)
       raise Error::InvalidBetAmountError.new if bet_amount.to_f <= 0.0
 
-      raise Error::OutOfBalanceError.new if user.balance.to_f <= bet_amount
+      raise Error::InsufficientBalanceForBetAmount.new if user.balance.to_f <= bet_amount
     end
 
     self.hands.create(user_id: user.id, total_bet_amount: bet_amount)
@@ -38,6 +40,40 @@ class Game < ApplicationRecord
   def start_game!
     self.update(started_at: Time.now)
     initial_pass_cards_to_all!
+  end
+
+  ##
+  # Compare dealer hand vs player hands, set status, and return amount to user if needed.
+  # The dealer's hand needs to finish also.
+  # @yield <Hand> w/ status update
+  def analyze_hands!(&block)
+    raise Error::DealerNotFinished.new unless dealer_hand.is_turn_ended?
+    
+    dealer_best_value = dealer_hand.best_total_value
+
+    self.hands.each do|hand|
+      next if hand.user_id == dealer_id
+      
+      unless hand.lose? # already lost, no money return
+
+        if dealer_hand.lose? && hand.lose? || dealer_best_value == hand.best_total_value
+          hand.status = 'TIE'
+          hand.save
+          hand.return_amount_to_user!
+
+        elsif dealer_hand.lose? || dealer_best_value < hand.best_total_value
+          hand.status = 'WIN'
+          hand.save
+          hand.return_amount_to_user!
+
+        else
+          hand.status = 'LOSE'
+          hand.save
+        end
+      end
+      yield hand if block_given?
+    end
+    self.hands.reload
   end
 
   ##################################
