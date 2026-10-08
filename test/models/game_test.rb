@@ -107,6 +107,29 @@ class GameTest < ActiveSupport::TestCase
     assert !hand.lose?
   end
 
+  test "Double without Bust" do
+    hand = create_game_then_hand
+
+    # now keep hitting til busted
+    puts "Double without Bust ------------------------"
+    puts hand.to_s
+    assert !hand.busted?
+
+    how_many_before_bust = 21 - hand.variants_of_total_value.min
+    next_available_card = hand.game.available_play_cards.first
+    if next_available_card.card.min_value > how_many_before_bust # stay w/in range
+      next_available_card.update(rank: Card.find_card_with_value(how_many_before_bust).rank )
+    end
+
+    next_play_card = hand.double!
+    puts "* HIT w/ card: #{next_play_card.card}"
+    puts "  > #{hand}"
+
+    assert hand.play_actions.last.is_a?(::PlayAction::Double)
+    assert hand.stand?
+    assert_equal next_available_card.id, next_play_card.id
+  end
+
   test "Double and Bust" do
     hand = create_game_then_hand
 

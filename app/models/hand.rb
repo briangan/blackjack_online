@@ -10,6 +10,8 @@ class Hand < ApplicationRecord
     end
   end
 
+  ENDED_STATUSES = %w(STAND WIN LOSE TIE)
+
   belongs_to :game, dependent: :destroy
   belongs_to :user, dependent: :destroy
   alias_method :player, :user
@@ -60,6 +62,12 @@ class Hand < ApplicationRecord
     variants_of_total_value.all?{|total| total > 21 }
   end
 
+  # Whether the player has chosen to stop making next move.
+  def is_turn_ended?
+    ENDED_STATUSES.include?(status&.upcase)
+  end
+  alias_method :is_finished?, :is_turn_ended?
+
   def to_s
     "Hand for #{user.name} (#{user.type}) w/ $#{total_bet_amount}, values #{variants_of_total_value.inspect}, cards: #{play_cards.collect{|pc| pc.card.to_s }.join(", ")}"
   end
@@ -109,6 +117,9 @@ class Hand < ApplicationRecord
     self.reload # ensure all attributes and associations fresh
 
     check_for_ending_status
+    unless is_turn_ended?
+      self.update(status: 'STAND')
+    end
 
     next_play_card
   end

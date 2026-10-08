@@ -70,4 +70,24 @@ class HandTest < ActiveSupport::TestCase
     assert_equal 16, hand.best_total_value
     assert !hand.busted?
   end
+
+  test "Status: turn not ended" do
+    hand = Hand.new(status: 'NEW')
+    hand.play_cards = [ 
+      PlayCard.new(rank: '2', suit: 'Diamond'),
+      PlayCard.new(rank: '9', suit: 'Diamond'),
+    ]
+    assert !hand.is_turn_ended?
+  end
+
+  test "Status: turn ended" do
+    ::Hand::ENDED_STATUSES.each do|status|
+      hand = Hand.new(status: status)
+      hand.play_cards = [ 
+        PlayCard.new(rank: '2', suit: 'Diamond'),
+        PlayCard.new(rank: '9', suit: 'Diamond'),
+      ]
+      assert hand.is_turn_ended?
+    end
+  end
 end
