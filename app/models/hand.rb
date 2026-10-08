@@ -119,7 +119,7 @@ class Hand < ApplicationRecord
   def split!
     raise ::Error::CannotSplitHand.new unless can_split_now? 
 
-    another_hand = Hand.create(game_id: game_id, user_id: user_id, order_index: order_index, total_bet_amount: total_bet_amount)
+    another_hand = Hand.create(game_id: game_id, user_id: user_id, order_index: order_index, total_bet_amount: total_bet_amount, status:'NEW')
     self.play_cards[1].pass_to!(another_hand.id)
 
     ::PlayAction::Split.create(hand_id: self.id, amount: self.total_bet_amount)
