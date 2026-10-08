@@ -1,6 +1,8 @@
 require "test_helper"
+require "helpers/game_test_helper"
 
 class GameTest < ActiveSupport::TestCase
+  include GameTestHelper
 
   setup do
     Hand.delete_all
@@ -71,168 +73,14 @@ class GameTest < ActiveSupport::TestCase
     end
 
     assert_equal (game.play_cards.count - game.hands.count * 2), game.available_play_cards.count
+
+    # Each player should make move, and then dealer
   end
 
-  test "Play Hit and Bust" do
-    hand = create_game_then_hand
-
-    # now keep hitting til busted
-    puts "Hit and Bust ------------------------"
-    puts hand.to_s
-    assert !hand.busted?
-
-    while hand.variants_of_total_value.min <= 21
-
-      # HIT
-      next_play_card = hand.hit!
-      puts "* HIT w/ card: #{next_play_card.card}"
-      puts "  > #{hand}"
-
-      assert hand.play_actions.last.is_a?(::PlayAction::Hit)
-    end
-
-    assert hand.lose?
-  end
-
-  test "Play Stand" do
-    hand = create_game_then_hand
-
-    puts hand.to_s
-    assert !hand.busted?
-
-    hand.stand!
-
-    assert hand.play_actions.last.is_a?(::PlayAction::Stand)
-    assert hand.stand?
-    assert !hand.lose?
-  end
-
-  test "Double without Bust" do
-    hand = create_game_then_hand
-
-    # now keep hitting til busted
-    puts "Double without Bust ------------------------"
-    puts hand.to_s
-    assert !hand.busted?
-
-    how_many_before_bust = 21 - hand.variants_of_total_value.min
-    next_available_card = hand.game.available_play_cards.first
-    if next_available_card.card.min_value > how_many_before_bust # stay w/in range
-      next_available_card.update(rank: Card.find_card_with_value(how_many_before_bust).rank )
-    end
-
-    next_play_card = hand.double!
-    puts "* HIT w/ card: #{next_play_card.card}"
-    puts "  > #{hand}"
-
-    assert hand.play_actions.last.is_a?(::PlayAction::Double)
-    assert hand.stand?
-    assert_equal next_available_card.id, next_play_card.id
-  end
-
-  test "Double and Bust" do
-    hand = create_game_then_hand
-
-    # now keep hitting til busted
-    puts "Double and Bust ------------------------"
-    puts hand.to_s
-    assert !hand.busted?
-
-    while hand.variants_of_total_value.min <= 21
-
-      # HIT
-      next_play_card = hand.double!
-      puts "* HIT w/ card: #{next_play_card.card}"
-      puts "  > #{hand}"
-
-      assert hand.play_actions.last.is_a?(::PlayAction::Double)
-    end
-
-    assert hand.lose?
-  end
-
-
-  test "Split" do
-    hand = create_game_then_hand
-
-    puts "Split ------------------------"
-    puts hand.to_s
-    assert !hand.busted?
-
-    play_card_ids = hand.play_cards.collect(&:id)
-    first_card_rank = hand.play_cards.first.card.rank
-    diff_card_rank = ::Card::RANKS.find{|r| r != first_card_rank }
-
-    # Fail to split
-    hand.play_cards.where("id != #{hand.play_cards.first.id}").update_all(rank: diff_card_rank)
-    assert_raises ::Error::CannotSplitHand do
-      hand.reload
-      hand.split!
-    end
-
-    # Set all to same ranks
-    hand.play_cards.update_all(rank: first_card_rank)
-    hand.reload
-    assert hand.can_split_now?
-    second_hand = hand.split!
-    
-    assert 2, hand.play_cards.count
-    assert 2, second_hand.play_cards.count
-
-    assert !hand.play_cards.find{|pc| pc.id == play_card_ids[0] }.nil?
-    assert hand.play_cards.find{|pc| pc.id == play_card_ids[1] }.nil?
-
-    assert !second_hand.play_cards.find{|pc| pc.id == play_card_ids[1] }.nil?
-    assert second_hand.play_cards.find{|pc| pc.id == play_card_ids[0] }.nil?
-    
-  end
+  
   
 
-  private 
 
-  # @return <Game>
-  def create_game_first
-    game = Game.create!
-    assert game.dealer.is_a?(Dealer)
 
-    # PlayCard
-    all_play_cards_count = game.play_cards.count
-    assert_equal all_play_cards_count, (Game::COUNT_OF_DECKS_PER_GAME * Card::RANKS.size * Card::SUITS.size)
-    assert_equal all_play_cards_count, game.available_play_cards.count
 
-    assert_equal all_play_cards_count, game.play_cards.distinct.pluck(:order_index).size
-
-    # Hand
-    assert_equal 1, game.hands.count
-    first_hand = game.hands.first
-    assert_equal game.dealer_id, first_hand.user_id
-    assert_equal 'NEW', first_hand.status
-
-    game
-  end
-
-  def check_adding_user(game, name_or_user, bet_amount)
-    new_user_new_hand = game.add_hand_for_user!(name_or_user, bet_amount)
-
-    assert new_user_new_hand.is_a?(Hand)
-    assert new_user_new_hand.new?
-    assert new_user_new_hand.user.is_a?(Player)
-    assert bet_amount, new_user_new_hand.total_bet_amount
-    assert (User::DEFAULT_BALANCE - bet_amount), new_user_new_hand.user.balance
-
-    new_user_new_hand
-  end
-
-  # @return <Hand>
-  def create_game_then_hand
-    game = create_game_first
-
-    user_name = "User #{1000 + rand(10000000000)}"
-    bet_amount = 5
-    hand = game.add_hand_for_user!(user_name, bet_amount)
-
-    game.start_game!
-
-    hand
-  end
 end

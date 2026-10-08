@@ -68,6 +68,19 @@ class Hand < ApplicationRecord
   end
   alias_method :is_finished?, :is_turn_ended?
 
+  def is_winning_determined?
+    %w(WIN LOSE TIE).include?(status&.upcase)
+  end
+
+  # The current play_cards have: (Ace + 10‑value card)
+  def is_blackjack?
+    if play_cards.size == 2
+      play_cards.find{|pc| pc.card.max_value == 11 } && play_cards.find{|pc| pc.card.max_value == 10 } 
+    else
+      false
+    end
+  end
+
   def to_s
     "Hand for #{user.name} (#{user.type}) w/ $#{total_bet_amount}, values #{variants_of_total_value.inspect}, cards: #{play_cards.collect{|pc| pc.card.to_s }.join(", ")}"
   end
@@ -81,6 +94,25 @@ class Hand < ApplicationRecord
   # Really must be exactly 2 of same rank cards, or can be more than 3 also?
   def can_split_now?
     play_cards.count >= 2 && play_cards.collect{|pc| pc.card.values.min }.uniq.size == 1
+  end
+
+  # Based on status and cards
+  #   Win: basically 2 x total_bet_amount
+  #   Win with Blackjack (Ace + 10‑value card): 2.5 x total_bet_amount
+  #   Tie: no change to balance
+  # @return <Integer>
+  def return_amount_to_user!
+    returning_amount = 
+      if tied?
+        total_bet_amount
+      elsif win?
+        is_blackjack? ? (2.5 * total_bet_amount.to_f) : (2 * total_bet_amount.to_f)
+      else
+        0
+      end
+    new_balance = user.balance.to_f + total_bet_amount.to_f
+    user.update(balance: new_balance)
+    new_balance
   end
 
   #######################
@@ -109,6 +141,9 @@ class Hand < ApplicationRecord
   # Double the bet, take one final card, then stand.
   # @return <Card>
   def double!
+    if user.balance.to_f < total_bet_amount.to_f 
+      railse ::Error::InsufficientBalanceForBetAmount.new(user.balance, total_bet_amount).new
+    end
     next_play_card = game.available_play_cards.first
     next_play_card.pass_to!(self.id)
     
@@ -144,6 +179,12 @@ class Hand < ApplicationRecord
     self.reload # Ensure self and associations fresh
 
     another_hand
+  end
+
+  ##
+  # Based on some defined rules, make reasonable moves automatically
+  def auto_make_moves!
+    # TODO: IMPLEMENT
   end
 
   private

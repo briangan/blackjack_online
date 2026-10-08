@@ -1,6 +1,9 @@
 require "test_helper"
+require "helpers/game_test_helper"
 
 class HandTest < ActiveSupport::TestCase
+
+  include GameTestHelper
 
   test "2 cards, no ace" do
     hand = Hand.new()
@@ -90,4 +93,122 @@ class HandTest < ActiveSupport::TestCase
       assert hand.is_turn_ended?
     end
   end
+
+  ######################################
+  # Play actions on the hand
+
+  test "Play Hit and Bust" do
+    hand = create_game_then_hand
+
+    # now keep hitting til busted
+    puts "Hit and Bust ------------------------"
+    puts hand.to_s
+    assert !hand.busted?
+
+    while hand.variants_of_total_value.min <= 21
+
+      # HIT
+      next_play_card = hand.hit!
+      puts "* HIT w/ card: #{next_play_card.card}"
+      puts "  > #{hand}"
+
+      assert hand.play_actions.last.is_a?(::PlayAction::Hit)
+    end
+
+    assert hand.lose?
+  end
+
+  test "Play Stand" do
+    hand = create_game_then_hand
+
+    puts hand.to_s
+    assert !hand.busted?
+
+    hand.stand!
+
+    assert hand.play_actions.last.is_a?(::PlayAction::Stand)
+    assert hand.stand?
+    assert !hand.lose?
+  end
+
+  test "Double without Bust" do
+    hand = create_game_then_hand
+
+    # now keep hitting til busted
+    puts "Double without Bust ------------------------"
+    puts hand.to_s
+    assert !hand.busted?
+
+    how_many_before_bust = 21 - hand.variants_of_total_value.min
+    next_available_card = hand.game.available_play_cards.first
+    if next_available_card.card.min_value > how_many_before_bust # stay w/in range
+      next_available_card.update(rank: Card.find_rank_with_value(how_many_before_bust) )
+    end
+
+    next_play_card = hand.double!
+    puts "* HIT w/ card: #{next_play_card.card}"
+    puts "  > #{hand}"
+
+    assert hand.play_actions.last.is_a?(::PlayAction::Double)
+    assert hand.stand?
+    assert_equal next_available_card.id, next_play_card.id
+  end
+
+  test "Double and Bust" do
+    hand = create_game_then_hand
+
+    # now keep hitting til busted
+    puts "Double and Bust ------------------------"
+    puts hand.to_s
+    assert !hand.busted?
+
+    while hand.variants_of_total_value.min <= 21
+
+      # HIT
+      next_play_card = hand.double!
+      puts "* HIT w/ card: #{next_play_card.card}"
+      puts "  > #{hand}"
+
+      assert hand.play_actions.last.is_a?(::PlayAction::Double)
+    end
+
+    assert hand.lose?
+  end
+
+
+  test "Split" do
+    hand = create_game_then_hand
+
+    puts "Split ------------------------"
+    puts hand.to_s
+    assert !hand.busted?
+
+    play_card_ids = hand.play_cards.collect(&:id)
+    first_card_rank = hand.play_cards.first.card.rank
+    diff_card_rank = ::Card::RANKS.find{|r| r != first_card_rank }
+
+    # Fail to split
+    hand.play_cards.where("id != #{hand.play_cards.first.id}").update_all(rank: diff_card_rank)
+    assert_raises ::Error::CannotSplitHand do
+      hand.reload
+      hand.split!
+    end
+
+    # Set all to same ranks
+    hand.play_cards.update_all(rank: first_card_rank)
+    hand.reload
+    assert hand.can_split_now?
+    second_hand = hand.split!
+    
+    assert 2, hand.play_cards.count
+    assert 2, second_hand.play_cards.count
+
+    assert !hand.play_cards.find{|pc| pc.id == play_card_ids[0] }.nil?
+    assert hand.play_cards.find{|pc| pc.id == play_card_ids[1] }.nil?
+
+    assert !second_hand.play_cards.find{|pc| pc.id == play_card_ids[1] }.nil?
+    assert second_hand.play_cards.find{|pc| pc.id == play_card_ids[0] }.nil?
+    
+  end
+
 end
