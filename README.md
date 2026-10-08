@@ -82,3 +82,18 @@ This is an online Blackjack card game to allow 1 or more players to play against
 * Services (job queues, cache servers, search engines, etc.)
 
 * Deployment instructions
+
+---------------------------------------
+## Future TODOs
+
+### User
+  * Actual user registration and authentication
+
+### Game Play
+  * Separate each hand's actions to respond on the logged-in user's view of page; and verify
+  * Some rules to automate dealer's actions
+  * Broadcast moves to each player's browser using ActionCable
+
+### UI
+  * Animation passing out cards
+  * Animation for disclosing hand of cards

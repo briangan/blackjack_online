@@ -52,4 +52,24 @@ module GameTestHelper
 
     hand
   end
+
+
+  # Modify either Hand's PlayCard to force @wanted_higher_hand > @wanted_lower_hand
+  # @wanted_higher_hand <Hand>
+  # @wanted_lower_hand <Hand>
+  def force_this_higher_than_that(wanted_higher_hand, wanted_lower_hand)
+    if wanted_higher_hand.best_total_value <= wanted_lower_hand.best_total_value
+      diff = wanted_lower_hand.best_total_value - wanted_higher_hand.best_total_value
+
+      if (deductable_card = wanted_lower_hand.play_cards.find{|pc| pc.card.max_value > 2 })
+        deductable_card.update(rank: Card.find_rank_with_value(deductable_card.card.max_value - diff - 1) )
+        wanted_lower_hand.reload
+
+      elsif (raisable_card = wanted_higher_hand.play_cards.find{|pc| pc.card.max_value < 10 })
+        raisable_card.update(rank: Card.find_rank_with_value(raisable_card.card.max_value + diff + 1) )
+        wanted_higher_hand.reload
+      end
+    end
+    wanted_higher_hand
+  end
 end

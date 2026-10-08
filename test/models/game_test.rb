@@ -133,23 +133,6 @@ class GameTest < ActiveSupport::TestCase
 
   end
 
-  # Modify either Hand's PlayCard to force @wanted_higher_hand > @wanted_lower_hand
-  def force_this_higher_than_that(wanted_higher_hand, wanted_lower_hand)
-    if wanted_higher_hand.best_total_value <= wanted_lower_hand.best_total_value
-      diff = wanted_lower_hand.best_total_value - wanted_higher_hand.best_total_value
-
-      if (deductable_card = wanted_lower_hand.play_cards.find{|pc| pc.card.max_value > 2 })
-        deductable_card.update(rank: Card.find_rank_with_value(deductable_card.card.max_value - diff - 1) )
-        wanted_lower_hand.reload
-
-      elsif (raisable_card = wanted_higher_hand.play_cards.find{|pc| pc.card.max_value < 10 })
-        raisable_card.update(rank: Card.find_rank_with_value(raisable_card.card.max_value + diff + 1) )
-        wanted_higher_hand.reload
-      end
-    end
-    wanted_higher_hand
-  end
-
   test "Lose - Lower Value" do
     puts "Lose - Lower Value --------------------" 
     hand = create_game_then_hand
@@ -209,8 +192,8 @@ class GameTest < ActiveSupport::TestCase
 
   end
 
-  test "Tie with Dealer" do
-    puts "Tie with Dealer --------------------" 
+  test "Tie with Dealer - Same Value" do
+    puts "Tie with Dealer - Same Value --------------------" 
     hand = create_game_then_hand
     game = hand.game
     previous_balance = hand.user.balance

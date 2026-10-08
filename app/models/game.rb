@@ -61,7 +61,7 @@ class Game < ApplicationRecord
           hand.save
           hand.return_amount_to_user!
 
-        elsif dealer_hand.lose? || dealer_best_value < hand.best_total_value
+        elsif dealer_hand.lose? || dealer_hand.busted? || dealer_best_value < hand.best_total_value
           hand.status = 'WIN'
           hand.save
           hand.return_amount_to_user!
