@@ -55,7 +55,7 @@ class HandTest < ActiveSupport::TestCase
       PlayCard.new(rank: '9', suit: 'Club'),
     ]
     assert [22], hand.variants_of_total_value.sort
-    assert_equal nil, hand.best_total_value
+    assert_nil hand.best_total_value
     assert hand.busted?
   end
 

@@ -26,7 +26,7 @@ class Card
     values.max
   end
 
-  def title
-    "#{rank} of #{suit}"
+  def to_s
+    "Card[#{rank} of #{suit}]"
   end
 end

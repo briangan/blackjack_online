@@ -74,14 +74,96 @@ class GameTest < ActiveSupport::TestCase
   end
 
   test "Play Hit and Bust" do
-    game = create_game_first
+    hand = create_game_then_hand
 
-    user_name = "User #{1000 + rand(10000000000)}"
-    bet_amount = 5
-    hand = game.add_hand_for_user!(user_name, bet_amount)
+    # now keep hitting til busted
+    puts "Hit and Bust ------------------------"
+    puts hand.to_s
+    assert !hand.busted?
 
-    game.start_game!
+    while hand.variants_of_total_value.min <= 21
+
+      # HIT
+      next_play_card = hand.hit!
+      puts "* HIT w/ card: #{next_play_card.card}"
+      puts "  > #{hand}"
+
+      assert hand.play_actions.last.is_a?(::PlayAction::Hit)
+    end
+
+    assert hand.lose?
   end
+
+  test "Play Stand" do
+    hand = create_game_then_hand
+
+    puts hand.to_s
+    assert !hand.busted?
+
+    hand.stand!
+
+    assert hand.play_actions.last.is_a?(::PlayAction::Stand)
+    assert hand.stand?
+    assert !hand.lose?
+  end
+
+  test "Double and Bust" do
+    hand = create_game_then_hand
+
+    # now keep hitting til busted
+    puts "Double and Bust ------------------------"
+    puts hand.to_s
+    assert !hand.busted?
+
+    while hand.variants_of_total_value.min <= 21
+
+      # HIT
+      next_play_card = hand.double!
+      puts "* HIT w/ card: #{next_play_card.card}"
+      puts "  > #{hand}"
+
+      assert hand.play_actions.last.is_a?(::PlayAction::Double)
+    end
+
+    assert hand.lose?
+  end
+
+
+  test "Split" do
+    hand = create_game_then_hand
+
+    puts "Split ------------------------"
+    puts hand.to_s
+    assert !hand.busted?
+
+    play_card_ids = hand.play_cards.collect(&:id)
+    first_card_rank = hand.play_cards.first.card.rank
+    diff_card_rank = ::Card::RANKS.find{|r| r != first_card_rank }
+
+    # Fail to split
+    hand.play_cards.where("id != #{hand.play_cards.first.id}").update_all(rank: diff_card_rank)
+    assert_raises ::Error::CannotSplitHand do
+      hand.reload
+      hand.split!
+    end
+
+    # Set all to same ranks
+    hand.play_cards.update_all(rank: first_card_rank)
+    hand.reload
+    assert hand.can_split_now?
+    second_hand = hand.split!
+    
+    assert 2, hand.play_cards.count
+    assert 2, second_hand.play_cards.count
+
+    assert !hand.play_cards.find{|pc| pc.id == play_card_ids[0] }.nil?
+    assert hand.play_cards.find{|pc| pc.id == play_card_ids[1] }.nil?
+
+    assert !second_hand.play_cards.find{|pc| pc.id == play_card_ids[1] }.nil?
+    assert second_hand.play_cards.find{|pc| pc.id == play_card_ids[0] }.nil?
+    
+  end
+  
 
   private 
 
@@ -116,5 +198,18 @@ class GameTest < ActiveSupport::TestCase
     assert (User::DEFAULT_BALANCE - bet_amount), new_user_new_hand.user.balance
 
     new_user_new_hand
+  end
+
+  # @return <Hand>
+  def create_game_then_hand
+    game = create_game_first
+
+    user_name = "User #{1000 + rand(10000000000)}"
+    bet_amount = 5
+    hand = game.add_hand_for_user!(user_name, bet_amount)
+
+    game.start_game!
+
+    hand
   end
 end

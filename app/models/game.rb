@@ -1,3 +1,4 @@
+# Columns: started_at status dealer_id
 class Game < ApplicationRecord
   VALID_STATUSES = %[WAITING IN_PROGRESS COMPLETED CANCELLED]
   COUNT_OF_DECKS_PER_GAME = 1
@@ -5,7 +6,7 @@ class Game < ApplicationRecord
   belongs_to :dealer, class_name:'Dealer', foreign_key:'dealer_id', optional: true
 
   has_many :play_cards, dependent: :destroy
-  has_many :available_play_cards, -> { where("hand_id IS NULL")}, class_name:'PlayCard'
+  has_many :available_play_cards, -> { where("hand_id IS NULL").order('order_index asc') }, class_name:'PlayCard'
   has_many :hands, dependent: :destroy
 
   before_save :set_defaults
@@ -35,6 +36,7 @@ class Game < ApplicationRecord
   end
 
   def start_game!
+    self.update(started_at: Time.now)
     initial_pass_cards_to_all!
   end
 

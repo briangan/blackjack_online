@@ -1,7 +1,7 @@
 module Error
   class OutOfBalanceError < ArgumentError
-    def initialize(msg = nil)
-      super(msg || "User account balance is out")
+    def initialize(msg = '')
+      super( ["User account balance is out", msg].reject(&:blank?).join('. ') )
     end
   end
 end
