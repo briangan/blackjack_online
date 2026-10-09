@@ -10,14 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_07_182659) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_09_135526) do
   create_table "games", force: :cascade do |t|
     t.datetime "started_at"
     t.string "status"
     t.integer "dealer_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "table_id", null: false
     t.index ["status"], name: "index_games_on_status"
+    t.index ["table_id"], name: "index_games_on_table_id"
   end
 
   create_table "hands", force: :cascade do |t|
@@ -52,6 +54,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_07_182659) do
     t.index ["game_id"], name: "index_play_cards_on_game_id"
     t.index ["order_index"], name: "index_play_cards_on_order_index"
     t.index ["rank", "suit"], name: "index_play_cards_on_rank_and_suit"
+  end
+
+  create_table "table_users", force: :cascade do |t|
+    t.integer "table_id", null: false
+    t.integer "user_id", null: false
+    t.index ["table_id"], name: "index_table_users_on_table_id"
+    t.index ["user_id"], name: "index_table_users_on_user_id"
+  end
+
+  create_table "tables", force: :cascade do |t|
+    t.integer "dealer_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|

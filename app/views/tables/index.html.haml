@@ -1,0 +1,20 @@
+.container.mt-3
+  .float-start
+    %h1 Tables
+  .float-end.pt-3
+    = form_tag(tables_path(t: Time.now.to_i), method:'post', data:{ turbo: false} ) do
+      = submit_tag('Create New Table', class:'btn btn-success', data:{ disable_with:'Creating..' })
+
+  #tables_list
+    %table.table.table-striped
+      %tbody
+        - @tables.all.each do|table|
+          %tr
+            %td
+              %h5 
+                = link_to("Table ##{table.id}", table_path(table))
+            %td
+              = button_to(table_path(table), method:'delete', class:'btn btn-sm btn-danger') do
+                %i.bi.bi-trash
+
+  -#= paginate(@tables)

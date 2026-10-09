@@ -1,0 +1,13 @@
+%div(id="table_panel_of_user_#{table_user.id}" class="table-user-panel m-3 ")
+  .card
+    .card-body.p-3
+      %span.float-start #{table_user.user.name}
+      %span.float-end
+        = link_to(delete_user_table_path(id: table_user.table_id, table_user_id: table_user.id), methotd:'delete', confirm:'Are you sure?') do
+          %i.bi.bi-trash.text-danger
+      %br
+      %br
+      %label Bet Amount: 
+      = select_tag("bet_amount_of_user_#{table_user.user_id}", options_for_select([2,5,10,25,50], params["bet_amount_of_user_#{table_user.user_id}"] || Hand::DEFAULT_BET_AMOUNT) )
+      %br
+      

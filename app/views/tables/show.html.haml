@@ -1,0 +1,6 @@
+.container.mt-3
+  %h1 Table ##{@table.id}
+  %br
+  = turbo_frame_tag 'players_frame' do  
+    = render partial: "players_frame", locals:{ table: @table }
+

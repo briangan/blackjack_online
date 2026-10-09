@@ -1,0 +1,24 @@
+:ruby
+  # Required locals: table
+
+.row
+  .col-md-2
+    %h4 Players 
+  .col-md-4
+    = form_tag(add_user_table_path(id: table.id), method:'post', remote: true  ) do
+      = text_field_tag(:name, '', class:'form-field', required: true)
+      = submit_tag('Add Player', class:"btn btn-secondary", data:{ disable_with:'Add..'} )
+%br
+= form_tag(create_game_table_path(id: table.id), method:'post', remote: true, data:{ turbo: false }  ) do
+  .text-end
+    - if last_game = table.games.unfinished.last
+      = link_to('See Last Game', game_path(last_game), class:'btn btn-lg btn-info')
+      &nbsp;&nbsp;
+    - if table.table_users.count > 0
+      = submit_tag('Start New Game', id: "create_game_button", class:"btn btn-lg btn-success", title: 'Add Players to Start Game', data:{ disable_with:'Starting..'} )
+    - else
+      %h4 
+        Add Players Before 
+        = submit_tag('Start New Game', id: "create_game_button", class:"btn btn-lg btn-success", title: 'Add Players to Start Game', disabled: true )          
+  %div(id="players_list" class="d-flex flex-row")
+    = render partial:'table_user_panel', collection: table.table_users.includes(:user), as:'table_user'

@@ -9,6 +9,22 @@ Rails.application.routes.draw do
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
+  resources :tables, only:[:create, :destroy, :show, :index] do
+    member do
+      match 'add_user', to: 'tables#add_user', via:[:post]
+      match 'delete_user/:table_user_id', to: 'tables#delete_user', via:[:delete], as:'delete_user'
+      match 'create_game', to: 'tables#create_game', via:[:post]
+    end
+  end
+
+  resources :games, only:[:show, :create] do
+    member do
+      match 'new_hand', to: 'games#new_hand', via:[:get]
+      match 'create_hand', to: 'games#create_hand', via:[:post]
+    end
+  end
+  get "cards" => "cards#index"
+
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "tables#index"
 end
