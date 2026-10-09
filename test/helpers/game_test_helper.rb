@@ -3,7 +3,8 @@ module GameTestHelper
 
   # @return <Game>
   def create_game_first
-    game = Game.create!
+    table = Table.create
+    game = Game.create!(table_id: table.id)
     assert game.dealer.is_a?(Dealer)
 
     # PlayCard

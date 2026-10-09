@@ -1,13 +1,19 @@
 # Columns: started_at status dealer_id
 class Game < ApplicationRecord
-  VALID_STATUSES = %[WAITING IN_PROGRESS COMPLETED CANCELLED]
+  VALID_STATUSES = %w[WAITING IN_PROGRESS COMPLETED CANCELLED]
   COUNT_OF_DECKS_PER_GAME = 1
 
+  belongs_to :table
   belongs_to :dealer, class_name:'Dealer', foreign_key:'dealer_id', optional: true
 
   has_many :play_cards, dependent: :destroy
   has_many :available_play_cards, -> { where("hand_id IS NULL").order('order_index asc') }, class_name:'PlayCard'
   has_many :hands, dependent: :destroy
+  
+  # Excludes dealer
+  has_many :player_hands, -> (game) { where("user_id != #{game.dealer_id}") }, class_name:'Hand'
+
+  scope :unfinished, -> { where(status: %w[WAITING IN_PROGRESS] ) }
 
   before_save :set_defaults
   after_create :generate_initial_records!

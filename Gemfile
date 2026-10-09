@@ -22,6 +22,7 @@ gem "jbuilder"
 
 gem "inherited_resources"
 gem "haml"
+gem "kaminari"
 
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
