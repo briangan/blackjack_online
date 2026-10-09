@@ -13,3 +13,24 @@
  *= require_tree .
  *= require_self
  */
+
+/* Cards ***********************/
+.card-suit-spade, .card-suit-club {
+  color: black;
+}
+.card-suit-diamond, .card-suit-heart {
+  color: red;
+}
+.playcard {
+  width: 3.4rem;
+  height: 5rem;
+  padding: 0.2rem 0.1rem;
+  border: inset 1px grey;
+}
+.playcard > .bi {
+  font-size: 160%;
+  text-align: center;
+}
+.playcard-back {
+  background-color: #a7c4ff;
+}
