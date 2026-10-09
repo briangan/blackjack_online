@@ -1,0 +1,9 @@
+.container
+  %h1 Cards
+
+  - @cards.each do|card|
+    %span(class="playcard card card-suit-#{card.suit.downcase} m-1 float-start" title="#{card.to_s}")
+      = card.rank
+      %br
+      %div(class="bi bi-suit-#{card.suit.downcase}-fill")
+  %span(class="playcard playcard-back m-1 float-start")

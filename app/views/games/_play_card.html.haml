@@ -1,0 +1,6 @@
+:ruby
+  # Expected locals: play_card
+%span(class="playcard card-suit-#{play_card.card.suit.downcase} m-1" title="#{play_card.card.to_s}")
+  = play_card.card.rank
+  %br
+  %div(class="bi bi-suit-#{play_card.card.suit.downcase}-fill")

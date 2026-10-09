@@ -25,7 +25,8 @@
   width: 3.4rem;
   height: 5rem;
   padding: 0.2rem 0.1rem;
-  border: inset 1px grey;
+  border: outset 2px grey;
+  background-color: white;
 }
 .playcard > .bi {
   font-size: 160%;
@@ -33,4 +34,21 @@
 }
 .playcard-back {
   background-color: #a7c4ff;
+}
+
+.hand {
+  width: 18rem; 
+  margin: 1rem;
+  padding: 0.7rem;
+  background-color: #cccccc;
+  border: solid 3px gray;
+}
+.hand-status-win {
+  border: solid 3px rgb(25, 173, 25);
+}
+.hand-status-lose {
+  border: solid 3px rgb(190, 57, 27);
+}
+.hand-status-tie {
+  border: solid 3px rgb(63, 144, 202);
 }
