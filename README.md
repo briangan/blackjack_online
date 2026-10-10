@@ -9,11 +9,13 @@ This is an online Blackjack card game to allow 1 or more players to play against
 ## References
   * Project documentation: in folder "doc", see ["Praeses_Blackjack_Homework_2026_WebApp.pdf"](doc/Praeses_Blackjack_Homework_2026_WebApp.pdf)
   * [Blackjack Rules](https://bicyclecards.com/how-to-play/blackjack/)
+  * [Blackjack Wiki](https://www.wikihow.com/Play-Blackjack)
 
 -------------------------------------
 ## Gameplay Steps
   ### Game Start
   * If New Game, shuffle a deck of 52; Else keep existing left over cards
+  * Players: at least one users added to Table with bet amount, Start New Game
   * Pass out cards
     * First pass 2 cards to dealer; one face up and the other face down
     * For each player
@@ -57,7 +59,8 @@ This is an online Blackjack card game to allow 1 or more players to play against
 
 ------------------------------------
 ## Data Models
-  * Game - has a Deck, and some Hands
+  * Table - has a Dealer, Players, and multiple Games
+  * Game - a game play to win or lose against the dealer; has a Deck, and some Hands of PlayCards
   * Deck - has set of PlayCard which could be shuffled.  This model is optinal by direct reference of PlayCard.game_id
   * User - account authentication and attributes
   * Hand - one User or the dealer that has set of PlayCard
@@ -88,6 +91,10 @@ This is an online Blackjack card game to allow 1 or more players to play against
 
 ### User
   * Actual user registration and authentication
+
+### Table
+  * Default show Table page to show latest incomplete Game
+  * Starting new Game would cancel the old incomplete
 
 ### Game Play
   * Separate each hand's actions to respond on the logged-in user's view of page; and verify

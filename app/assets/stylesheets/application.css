@@ -37,18 +37,24 @@
 }
 
 .hand {
-  width: 18rem; 
   margin: 1rem;
   padding: 0.7rem;
   background-color: #cccccc;
   border: solid 3px gray;
 }
+.hand-status-stand {
+  color: blue;
+  border: solid 3px blue;
+}
 .hand-status-win {
-  border: solid 3px rgb(25, 173, 25);
+  color: green;
+  border: solid 3px green;
 }
 .hand-status-lose {
-  border: solid 3px rgb(190, 57, 27);
+  color: red;
+  border: solid 3px red;
 }
 .hand-status-tie {
-  border: solid 3px rgb(63, 144, 202);
+  color: purple;
+  border: solid 3px purple;
 }
