@@ -102,6 +102,9 @@ class GameTest < ActiveSupport::TestCase
       assert hand.win?
       assert hand.user.balance, previous_balance + hand.total_bet_amount * hand.winning_return_amount_factor
 
+      game.reload
+      assert game.completed?
+
     else # If somehow still cannot be higher, some data problem
     end
   end

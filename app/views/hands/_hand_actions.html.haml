@@ -1,0 +1,16 @@
+:ruby
+  # Expected locals: hand
+- if hand.is_turn_ended? 
+  - if hand.is_user_the_dealer?
+    - if hand.busted?
+      %h4 BUSTED
+  - else
+    %h4 #{hand.status}
+- else
+  = button_to('Hit', hand_hit_path(id: hand.id), remote: true, class:'btn btn-danger m-2')
+  = button_to('Stand', hand_stand_path(id: hand.id), remote: true, class:'btn btn-primary m-2')
+  - unless hand.is_user_the_dealer?
+    - if hand.can_double_now?
+      = button_to('Double', hand_double_path(id: hand.id), remote: true, class:'btn btn-secondary m-2')
+    - if hand.can_split_now?
+      = button_to('Split', hand_split_path(id: hand.id), remote: true, class:'btn btn-warning m-2')

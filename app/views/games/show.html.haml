@@ -1,0 +1,29 @@
+.container.mt-3
+  %h2 
+    = link_to("Table ##{@game.table_id}", table_path(id: @game.table_id)) 
+    &gt; Game
+  - if @game.table.table_users.count > 0
+    = form_tag(create_game_table_path(id: @game.table_id), method:'post', remote: true, data:{ turbo: false }  ) do
+      .text-end
+        = submit_tag('Start New Game', id: "create_game_button", class:"btn btn-lg btn-success", title: 'Add Players to Start Game', data:{ disable_with:'Starting..'} )
+  .row.justify-content-md-center
+    .col.col-lg-2
+    .col.col-md-auto.p-3(style="border: solid 2px grey; background-color: rgb(153,255,204)")
+      %h5 Dealer
+      - dealer_hand = @game.dealer_hand
+      = turbo_frame_tag "hand_frame_#{dealer_hand.id}" do
+        = render partial:'hands/hand', locals:{ hand: dealer_hand }
+    .col.col-lg-2
+  %br
+  %br
+  .row
+    .col-md-2
+      %h4 Players 
+    .col-md-10
+  %div(id="hands_list")
+    = turbo_frame_tag "hands_frame" do
+      - @game.player_hands.each do|hand|
+        = turbo_frame_tag "hand_frame_#{hand.id}" do
+          = render partial:'hands/hand', locals:{ hand: hand }
+
+= render partial: '/modal', locals:{ id:'new_hand_modal', title:'Add Player', body:'', render_partial_for_body:'games/hand_form', render_partial_for_body_locals:{ game: @game } }

@@ -12,14 +12,17 @@ class Hand < ApplicationRecord
 
   ENDED_STATUSES = %w(STAND WIN LOSE TIE)
 
-  belongs_to :game, dependent: :destroy
-  belongs_to :user, dependent: :destroy
+  DEFAULT_BET_AMOUNT = 5
+
+  belongs_to :game
+  belongs_to :user
   alias_method :player, :user
 
   has_many :play_cards
   has_many :play_actions, class_name:'PlayAction::PlayAction'
 
   before_create :set_initial_attributes
+  after_create :extract_amount_from_user!
 
   # Variations of values caused by A.
   def variants_of_total_value
@@ -57,6 +60,10 @@ class Hand < ApplicationRecord
     results
   end
 
+  def is_user_the_dealer?
+    game.dealer_id == user_id
+  end
+
   # All variants are busted
   def busted?
     variants_of_total_value.all?{|total| total > 21 }
@@ -89,6 +96,7 @@ class Hand < ApplicationRecord
     if busted?
       self.status = 'LOSE'
       self.save
+      self.return_amount_to_user!
     end
   end
   
@@ -97,9 +105,19 @@ class Hand < ApplicationRecord
     play_cards.count >= 2 && play_cards.collect{|pc| pc.card.values.min }.uniq.size == 1
   end
 
+  def can_double_now?
+    user.balance.to_i >= total_bet_amount.to_i
+  end
+
   # Depends whether the hand has @is_blackjack?
   def winning_return_amount_factor
     is_blackjack? ? 2.5 : 2
+  end
+
+  def extract_amount_from_user!
+    return if is_user_the_dealer?
+    user.balance = user.balance - total_bet_amount
+    user.save
   end
 
   # Based on status and cards.  Uses @winning_return_amount_factor
@@ -123,7 +141,7 @@ class Hand < ApplicationRecord
   #######################
   # Actions for player to choose
 
-  # @return <Card>
+  # @return <PlayCard>
   def hit!
     next_play_card = game.available_play_cards.first
     next_play_card.pass_to!(self.id)
@@ -155,13 +173,20 @@ class Hand < ApplicationRecord
     
     ::PlayAction::Double.create(hand_id: self.id, amount: self.total_bet_amount)
 
-    self.reload # ensure all attributes and associations fresh
+    user.update(balance: user.balance - total_bet_amount)
+
+    self.total_bet_amount += total_bet_amount.to_f 
+    self.save
+    self.reload
 
     check_for_ending_status
+
     unless is_turn_ended?
       self.status = 'STAND'
       self.save
     end
+
+    self.reload # ensure all attributes and associations fresh
 
     next_play_card
   end
@@ -197,7 +222,7 @@ class Hand < ApplicationRecord
   private
 
   def set_initial_attributes
-    self.order_index = Hand.where(game_id: game_id).count + 1
+    self.order_index ||= Hand.where(game_id: game_id).count + 1
     self.status = 'NEW'
   end
 end

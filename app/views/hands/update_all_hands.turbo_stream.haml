@@ -1,0 +1,7 @@
+= turbo_stream.update "hands_frame" do
+  - @hand.game.player_hands.each do|_hand|
+    = turbo_frame_tag "hand_frame_#{_hand.id}" do
+      = render partial:'hands/hand', locals:{ hand: _hand }
+- dealer_hand = @hand.game.dealer_hand
+= turbo_stream.update "hand_frame_#{dealer_hand.id}" do
+  = raw render(partial:'hands/hand', locals:{ hand: dealer_hand } )

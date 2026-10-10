@@ -14,7 +14,7 @@
     - if last_game = table.games.unfinished.last
       = link_to('See Last Game', game_path(last_game), class:'btn btn-lg btn-info')
       &nbsp;&nbsp;
-    - if table.table_users.count > 0
+    - elsif table.table_users.count > 0
       = submit_tag('Start New Game', id: "create_game_button", class:"btn btn-lg btn-success", title: 'Add Players to Start Game', data:{ disable_with:'Starting..'} )
     - else
       %h4 

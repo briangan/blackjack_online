@@ -145,12 +145,17 @@ class HandTest < ActiveSupport::TestCase
       next_available_card.update(rank: Card.find_rank_with_value(how_many_before_bust) )
     end
 
+    past_balance = hand.user.balance
+    past_bet_amount = hand.total_bet_amount
+
     next_play_card = hand.double!
     puts "* HIT w/ card: #{next_play_card.card}"
     puts "  > #{hand}"
 
+    assert_equal (past_balance - past_bet_amount), hand.user.balance
     assert hand.play_actions.last.is_a?(::PlayAction::Double)
     assert hand.stand?
+    assert_equal (past_bet_amount * 2), hand.total_bet_amount
     assert_equal next_available_card.id, next_play_card.id
   end
 

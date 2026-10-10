@@ -1,0 +1,4 @@
+<%= turbo_stream.update "hand_frame_#{@hand.id}" do %>
+  <%= raw render(partial:'hands/hand', locals:{ hand: @hand } ) %>
+<% end %>
+  

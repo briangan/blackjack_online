@@ -50,6 +50,7 @@ module GameTestHelper
     hand = game.add_hand_for_user!(user_name, bet_amount)
 
     game.start_game!
+    assert game.in_progress?
 
     hand
   end

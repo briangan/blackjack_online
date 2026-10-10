@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   resources :tables, only:[:create, :destroy, :show, :index] do
     member do
       match 'add_user', to: 'tables#add_user', via:[:post]
-      match 'delete_user/:table_user_id', to: 'tables#delete_user', via:[:delete], as:'delete_user'
+      match 'delete_user/:table_user_id', to: 'tables#delete_user', via:[:get, :put, :delete], as:'delete_user'
       match 'create_game', to: 'tables#create_game', via:[:post]
     end
   end
@@ -23,6 +23,13 @@ Rails.application.routes.draw do
       match 'create_hand', to: 'games#create_hand', via:[:post]
     end
   end
+
+  # Actions to a Hand
+  match 'hands/:id/hit', to: 'hands#hit', via:[:get, :put, :post], as:'hand_hit'
+  match 'hands/:id/stand', to: 'hands#stand', via:[:get, :put, :post], as:'hand_stand'
+  match 'hands/:id/double', to: 'hands#double', via:[:get, :put, :post], as:'hand_double'
+  match 'hands/:id/spit', to: 'hands#split', via:[:get, :put, :post], as:'hand_split'
+
   get "cards" => "cards#index"
 
   # Defines the root path route ("/")

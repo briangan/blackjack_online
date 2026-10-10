@@ -1,7 +1,15 @@
-# Columns: started_at status dealer_id
+# Columns: table_id started_at status dealer_id
 class Game < ApplicationRecord
-  VALID_STATUSES = %w[WAITING IN_PROGRESS COMPLETED CANCELLED]
+  STATUSES = %w[WAITING IN_PROGRESS COMPLETED CANCELLED]
   COUNT_OF_DECKS_PER_GAME = 1
+
+  STATUSES.each do |status|
+    unless respond_to?("#{status.downcase}?")
+      define_method("#{status.downcase}?") do
+        self.status&.upcase == status
+      end
+    end
+  end
 
   belongs_to :table
   belongs_to :dealer, class_name:'Dealer', foreign_key:'dealer_id', optional: true
@@ -11,7 +19,7 @@ class Game < ApplicationRecord
   has_many :hands, dependent: :destroy
   
   # Excludes dealer
-  has_many :player_hands, -> (game) { where("user_id != #{game.dealer_id}") }, class_name:'Hand'
+  has_many :player_hands, -> (game) { where("user_id != #{game.dealer_id}").order('order_index asc') }, class_name:'Hand'
 
   scope :unfinished, -> { where(status: %w[WAITING IN_PROGRESS] ) }
 
@@ -19,7 +27,9 @@ class Game < ApplicationRecord
   after_create :generate_initial_records!
 
   def dealer_hand
-    dh = self.hands.find_or_initialize_by(user_id: dealer_id)
+    dh = self.hands.find_or_initialize_by(user_id: dealer_id) do|_dh|
+        _dh.total_bet_amount = 0
+      end
     dh.save
     dh
   end
@@ -40,11 +50,13 @@ class Game < ApplicationRecord
       raise Error::InsufficientBalanceForBetAmount.new if user.balance.to_f <= bet_amount
     end
 
+    self.table.table_users.find_or_create_by(user_id: user.id) # ensure integrity or Add User on show game page
+
     self.hands.create(user_id: user.id, total_bet_amount: bet_amount)
   end
 
   def start_game!
-    self.update(started_at: Time.now)
+    self.update(started_at: Time.now, status:'IN_PROGRESS')
     initial_pass_cards_to_all!
   end
 
@@ -79,6 +91,8 @@ class Game < ApplicationRecord
       end
       yield hand if block_given?
     end
+    self.status = 'COMPLETED'
+    self.save
     self.hands.reload
   end
 

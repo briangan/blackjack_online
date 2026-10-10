@@ -1,6 +1,10 @@
 :ruby
   # Expected locals: play_card
-%span(class="playcard card-suit-#{play_card.card.suit.downcase} m-1" title="#{play_card.card.to_s}")
-  = play_card.card.rank
-  %br
-  %div(class="bi bi-suit-#{play_card.card.suit.downcase}-fill")
+- if play_card.hide_face_down
+  %span(class="playcard playcard-back m-1")
+    %br
+- else
+  %span(class="playcard card-suit-#{play_card.card.suit.downcase} m-1" title="#{play_card.card.to_s}")
+    = play_card.card.rank
+    %br
+    %div(class="bi bi-suit-#{play_card.card.suit.downcase}-fill")

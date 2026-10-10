@@ -1,0 +1,7 @@
+:ruby
+  # Expected locals:
+  #   game
+= form_tag(create_hand_game_path, class:'form', method:'post', remote: true) do
+  %label(for="name") Name: 
+  = text_field_tag("name", '', class:'form-field')
+  = submit_tag("Add Player", class:'btn btn-success', data:{ disable_with:'Adding..'})

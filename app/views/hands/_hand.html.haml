@@ -1,0 +1,15 @@
+:ruby
+  # Required locals:
+  #   hand <Hand> with associated user for the game
+  the_play_cards = hand.play_cards.to_a
+%div(class="hand hand-status-#{hand.status.downcase} float-start")
+  - if hand.is_user_the_dealer?
+    - the_play_cards[0].hide_face_down = !hand.is_turn_ended?
+  - else
+    %span.float-start.fw-bold(title="Current Balance: #{hand.user.balance}") #{hand.user.name}
+    %span.float-end $#{hand.total_bet_amount.to_i}
+    %br
+  %div(id="play_cards_of_hand_#{hand.id}" class="play-cards-list mt-2 d-flex flex-row")
+    = render partial:'games/play_card', collection: the_play_cards, as:'play_card'
+  %div(id="actions_of_hand_#{hand.id}" class="mt-3 d-flex flex-row")
+    = render partial:'hands/hand_actions', locals:{ hand: hand }

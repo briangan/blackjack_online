@@ -18,10 +18,18 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     
     <%= javascript_importmap_tags %>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js" integrity="sha256-mblSWfbYzaq/f+4akyMhE6XELCou4jbkgPv+JQPER2M=" crossorigin="anonymous"></script>
     <%= javascript_include_tag "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" %>
+
   </head>
 
   <body>
+    <div id="flash_messages_wrapper">
+      <% if flash[:notice].present? %><div class="mb-3 alert alert-success" role="alert"><%= flash[:notice] %></div><% end -%>
+      <% if flash[:warning].present? %><div class="mb-3 alert alert-warning" role="alert"><%= flash[:warning] %></div><% end -%>
+      <% if flash[:alert].present? %><div class="mb-3 alert alert-danger" role="alert"><%= flash[:alert] %></div><% end -%>
+    </div>
     <%= yield %>
   </body>
 </html>
