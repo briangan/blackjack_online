@@ -96,7 +96,7 @@ class Hand < ApplicationRecord
     if busted?
       self.status = 'LOSE'
       self.save
-      self.return_amount_to_user!
+      # no bet money returned even if dealer has busted?
     end
   end
   

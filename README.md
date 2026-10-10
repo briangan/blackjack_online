@@ -15,7 +15,9 @@ This is an online Blackjack card game to allow 1 or more players to play against
 ## Gameplay Steps
   ### Game Start
   * If New Game, shuffle a deck of 52; Else keep existing left over cards
-  * Players: at least one users added to Table with bet amount, Start New Game
+  * Players: 
+    * At least one users added to Table with bet amount in order to Start New Game
+    * Upon entry of user, there's trial to fetch existing user of same name before creating new before users are independently acessing and authenticated in different browsers.
   * Pass out cards
     * First pass 2 cards to dealer; one face up and the other face down
     * Each player receives 2 cards; both cards face up

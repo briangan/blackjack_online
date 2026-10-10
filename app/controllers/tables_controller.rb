@@ -6,13 +6,13 @@ class TablesController < ::InheritedResources::Base
   end
 
   def add_user
-    params.permit(:name)
+    params.permit(:id, :name)
     @user = resource.add_user!(params[:name])
   end
 
   # /tables/:id/delete_user/:table_user_id
   def delete_user
-    params.permit(:table_user_id)
+    params.permit(:id, :table_user_id)
     resource.table_users.where(id: params[:table_user_id]).delete_all
     respond_to do|format|
       format.html { redirect_to table_path(resource) }
@@ -21,7 +21,7 @@ class TablesController < ::InheritedResources::Base
   end
 
   def create_game
-    params.permit! # simplify multiple params
+    params.permit! # simplify multiple params until final structure of object(s)
     bet_amounts_h = {} # user_id => amount
     params.each_pair do|k,v|
       if k.to_s =~ /^bet_amount_of_user_(\d+)/
