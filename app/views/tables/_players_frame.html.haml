@@ -1,16 +1,16 @@
 :ruby
   # Required locals: table
 
-.row
-  .col-md-2
+.row.bg-subtle.p-3
+  .col.col-md-2
     %h4 Players 
-  .col-md-4
+  .col.col-md-4
     = form_tag(add_user_table_path(id: table.id), method:'post', remote: true  ) do
       = text_field_tag(:name, '', class:'form-field', required: true)
       = submit_tag('Add Player', class:"btn btn-secondary", data:{ disable_with:'Add..'} )
 %br
 = form_tag(create_game_table_path(id: table.id), method:'post', remote: true, data:{ turbo: false }  ) do
-  .text-end
+  .text-center
     - if last_game = table.games.unfinished.last
       = link_to('See Last Game', game_path(last_game), class:'btn btn-lg btn-info')
       &nbsp;&nbsp;

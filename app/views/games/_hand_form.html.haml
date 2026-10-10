@@ -1,6 +1,6 @@
 :ruby
-  # Expected locals:
-  #   game
+  # Bar w/ add player (a hand in a game) form
+  # Expected locals: game
 = form_tag(create_hand_game_path, class:'form', method:'post', remote: true) do
   %label(for="name") Name: 
   = text_field_tag("name", '', class:'form-field')

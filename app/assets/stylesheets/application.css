@@ -14,6 +14,10 @@
  *= require_self
  */
 
+.bg-subtle {
+  background-color: #eee;
+}
+
 /* Cards ***********************/
 .card-suit-spade, .card-suit-club {
   color: black;
@@ -39,7 +43,7 @@
 .hand {
   margin: 1rem;
   padding: 0.7rem;
-  background-color: #cccccc;
+  background-color: #eee;
   border: solid 3px gray;
 }
 .hand-status-stand {
