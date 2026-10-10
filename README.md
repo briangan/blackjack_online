@@ -18,9 +18,7 @@ This is an online Blackjack card game to allow 1 or more players to play against
   * Players: at least one users added to Table with bet amount, Start New Game
   * Pass out cards
     * First pass 2 cards to dealer; one face up and the other face down
-    * For each player
-      * Places bet amount
-      * Receives 2 cards; both cards face up
+    * Each player receives 2 cards; both cards face up
   
   ### Player Turns: For each Hand
 
