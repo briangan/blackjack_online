@@ -3,7 +3,14 @@
 ---------------------------------
 ## Description
 
-This is an online Blackjack card game to allow 1 or more players to play against the dealer.
+This is an online Blackjack card game to allow 1 or more players to play against the dealer.  It was the short assessment that would be evaluated based on:
+* Adherence to Game Rules (High)
+* Approach to problem-solving and coding practices (Medium)
+* Program Structure and Design (Medium-High)
+* Documentation and Readability (Medium)
+* UI / Presentation (Low-Med)
+* Additional Features (Low)
+
 
 ----------------------------------
 ## References
